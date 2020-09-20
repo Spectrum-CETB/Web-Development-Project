@@ -1,0 +1,3 @@
+[submodule "Web"]
+	path = Web
+	url = https://github.com/Spectrum-CETB/Web-Development-Project.git
