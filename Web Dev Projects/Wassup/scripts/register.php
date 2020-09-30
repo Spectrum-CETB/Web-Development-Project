@@ -11,6 +11,7 @@
     $email = "";
     $password = "";
     $cpassword = "";
+    $salt = uniqid();
 
     // get form data
     if(isset($_POST['name'])) {
@@ -25,6 +26,8 @@
     if(isset($_POST['password'])) {
         $cpassword = $_POST['password'];
     }
+
+    $newPassword = md5(md5($password).$salt);
 
     // setting up the target directory where you want to upload your images!
     $target_dir = "../dp/";
@@ -78,7 +81,7 @@
 
     if($name != "" && $email != "" && $password != "" && $cpassword != "") { // if the form fields are not empty!
         
-        $checkUser = "SELECT * FROM users WHERE email = '$email'";
+        $checkUser = "SELECT * FROM users WHERE email = '$email' AND password = '$newPassword'";
         $checkUserStatus = mysqli_query($conn,$checkUser) or die(mysqli_error($conn));
 
         if(mysqli_num_rows($checkUserStatus) > 0) { // if user exists!
@@ -90,7 +93,7 @@
             if($password == $cpassword) { // if the password fields match!
             
                 $image = basename($_FILES["dp"]["name"]);
-                $insertUser = "INSERT INTO users(name,email,password,dp) VALUES('$name','$email','$password','$image')";
+                $insertUser = "INSERT INTO users(name,email,password,dp,salt) VALUES('$name','$email','$newPassword','$image','$salt')";
                 $insertUserStatus = mysqli_query($conn,$insertUser) or die(mysqli_error($conn));
     
                 if($insertUserStatus) { // if the user is successfully registered!
