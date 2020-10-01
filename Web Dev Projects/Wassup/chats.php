@@ -55,7 +55,7 @@
   </div>
 </nav>
 
-    <!-- chats section -->
+    <!-- chats zone -->
     <div class="container mt-4">
       <div class="card">
         <div class="card-title text-center">
