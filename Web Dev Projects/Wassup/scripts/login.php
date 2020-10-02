@@ -3,45 +3,61 @@
     // session start
     session_start();
 
+    // unset if there is already
+    if(isset($_SESSION['email']))
+        unset($_SESSION['email']);
+
     // include DB connection
     include('./db.php');
 
-    // declaring variables
-    $email = "";
-    $password = "";
-    $salt = uniqid();
-
     // getting form data!
-    if(isset($_POST['email'])) {
+    if(isset($_POST['email']) && isset($_POST['password'])) {
+
         $email = mysqli_real_escape_string($conn,strip_tags($_POST['email']));
-    }
-
-    if(isset($_POST['password'])) {
         $password = mysqli_real_escape_string($conn,strip_tags($_POST['password']));
-    }
 
-    $newPassword = md5(md5($password).$salt);
+        // this generates new id again.
+        // $salt = uniqid();
+        
 
-    if($email != "" && $password != "") { // if the fields are not empty!
-         
-        $checkUser = "SELECT * FROM `users` WHERE BINARY `email` = '$email' AND BINARY `password` = '$newPassword'";
-        $checkUserStatus = mysqli_query($conn,$checkUser) or die(mysqli_error($conn));
+        $checkUser = "SELECT salt, password FROM `users` WHERE BINARY `email` = '$email' LIMIT 1";
+        $checkUserStatus = mysqli_query($conn, $checkUser) or die(mysqli_error($conn));
 
-        if(mysqli_num_rows($checkUserStatus) > 0) { // if user exists!
+        // get one row, LIMIT 1
+        if( $userRow = mysqli_fetch_row($checkUserStatus)){
 
-            header('Location: ../chats.php?message=You have logged in!');
+            // salt is stored in db
+            $salt = $userRow[0];
 
-        } else {
+            // md5 password from db
+            $dbPassword = $userRow[1];
 
-            header('Location: ../index.php?message=Unable to login into your account!');
+            // get salt
+            $newPassword = md5(md5($password).$salt);
+
+            // check if mdd5 matches
+            if($dbPassword == $newPassword){
+
+                // if user exists!
+                $_SESSION['email'] = $email;
+                header('Location: ../chats.php?message=You have logged in!');
+            }
+            else{
+                // password match failed.
+                header('Location: ../index.php?message=Unable to login into your account!');
+            }
 
         }
+        else {
 
-    } else { // if the fields are empty!
-
-        header('Location: ../index.php?message=Please fill all the fields!');
-
+            header('Location: ../index.php?message=Unable to login into your account!');
+        }
+        
     }
+    else{
 
-    $_SESSION['email'] = $email;
+        // if the fields are empty!
+        header('Location: ../index.php?message=Please fill all the fields!');
+    }
+    
 ?>
