@@ -8,7 +8,7 @@
     error_reporting(0);
 
     // getting the message!
-    $message = $_GET['message'];
+    $message = htmlspecialchars($_GET['message']);
 
     // checking if the user is logged in or not!
     if(isset($_SESSION['email'])) { // if logged in!
